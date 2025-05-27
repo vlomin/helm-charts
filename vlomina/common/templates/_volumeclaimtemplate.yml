@@ -1,0 +1,16 @@
+{{- define "common.volumeClaimTemplate.tpl" -}}
+{{- $top := first . }}
+{{- $volumeClaimTemplate := index . 1 }}
+metadata:
+  name: {{ $top.Chart.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: "100Mi"
+{{- end }}
+
+{{- define "common.volumeClaimTemplate" -}}
+{{- include "common.utils.merge" (append . "common.volumeClaimTemplate.tpl") }}
+{{- end }}

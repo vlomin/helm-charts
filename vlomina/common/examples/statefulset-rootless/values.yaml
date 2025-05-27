@@ -1,0 +1,44 @@
+replicaCount: 1
+
+image:
+  registry: docker.io
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: 1.22
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+podAnnotations: {}
+
+# Настройки rootless и readonly. Подробнее каждое поле описано в README.md
+podSecurityContext:
+  fsGroup: 1000
+securityContext:
+  capabilities:
+    drop: ["ALL"]
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

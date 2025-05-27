@@ -1,0 +1,47 @@
+{{- define "common.cronJob.pod" -}}
+spec:
+  restartPolicy: OnFailure
+{{- end }}
+
+{{- define "common.cronJob.tpl" -}}
+{{- $top := first . }}
+{{- $cronJob := index . 1 }}
+{{- $pod := index . 2 }}
+{{- $serviceAccount := index . 3 }}
+{{- if semverCompare ">=1.21-0" $top.Capabilities.KubeVersion.GitVersion -}}
+apiVersion: batch/v1
+{{- else -}}
+apiVersion: batch/v1
+{{- end }}
+kind: CronJob
+metadata:
+  {{- include "common.metadata" (list $top) | nindent 2 }}
+spec:
+  schedule: "{{ $cronJob.schedule }}"
+  {{- with $cronJob.concurrencyPolicy }}
+  concurrencyPolicy: {{ . }}
+  {{- end }}
+  {{- with $cronJob.failedJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ . }}
+  {{- end }}
+  {{- with $cronJob.successfulJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ . }}
+  {{- end }}
+  {{- with $cronJob.suspend }}
+  suspend: {{ . }}
+  {{- end }}
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "common.selectorLabels" $top | nindent 8 }}
+    spec:
+      {{- with $cronJob.activeDeadlineSeconds }}
+      activeDeadlineSeconds: {{ . }}
+      {{- end }}
+      template:
+        {{- include "common.pod.template" (list $top $pod $serviceAccount "common.cronJob.pod") | nindent 8 }}
+{{- end }}
+
+{{- define "common.cronJob" -}}
+{{- include "common.utils.merge" (append . "common.cronJob.tpl") }}
+{{- end }}

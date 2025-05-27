@@ -1,0 +1,6 @@
+/sdk
+/.venv
+/**/__pycache__
+.dagger
+dagger.json
+test.sh

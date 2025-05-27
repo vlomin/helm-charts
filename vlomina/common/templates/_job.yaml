@@ -1,0 +1,21 @@
+{{- define "common.job.pod" -}}
+spec:
+  restartPolicy: OnFailure
+{{- end }}
+
+{{- define "common.job.tpl" -}}
+{{- $top := first . }}
+{{- $pod := index . 1 }}
+{{- $serviceAccount := index . 2 }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  {{- include "common.metadata" (list $top) | nindent 2 }}
+spec:
+  template:
+    {{- include "common.pod.template" (list $top $pod $serviceAccount "common.job.pod") | nindent 8 }}
+{{- end }}
+
+{{- define "common.job" -}}
+{{- include "common.utils.merge" (append . "common.job.tpl") }}
+{{- end }}

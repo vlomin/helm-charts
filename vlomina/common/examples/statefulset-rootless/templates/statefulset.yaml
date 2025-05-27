@@ -1,0 +1,57 @@
+{{- include "common.statefulset" (list . .Values .Values.autoscaling .Values.serviceAccount "<CHARTNAME>.statefulset") }}
+
+{{- define "<CHARTNAME>.statefulset" -}}
+spec:
+  template:
+    spec:
+      containers:
+      - {{- include "common.container" (append . "<CHARTNAME>.container") | nindent 8 }}
+      volumes:
+      - {{- include "common.volume" (append . "<CHARTNAME>.volume") | nindent 8 }}
+  volumeClaimTemplates:
+  - {{- include "common.volumeClaimTemplate" (append . "<CHARTNAME>.volumeClaimTemplate") | nindent 8 }}
+{{- end }}
+
+{{- define "<CHARTNAME>.volumeClaimTemplate"}}
+{{- $top := first . }}
+{{- $values  := index . 1 }}
+metadata:
+  name: {{ $top.Chart.Name }}
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: "100Mi"
+{{- end }}
+
+
+{{- define "<CHARTNAME>.volume" -}}
+{{- $top := first . }}
+{{- $values  := index . 1 }}
+name: nginx-config
+configMap:
+  name: nginx-config
+{{- end }}
+
+{{- define "<CHARTNAME>.container" -}}
+{{- $top := first . }}
+{{- $values  := index . 1 }}
+ports:
+  - name: http
+    containerPort: {{ $values.service.port }}
+    protocol: TCP
+livenessProbe: { tcpSocket: { port: http }, initialDelaySeconds: 5 }
+readinessProbe: { tcpSocket: { port: http }, initialDelaySeconds: 5 }
+env:
+  {{- include "global.envs" (list $top $values) | nindent 2 }}
+volumeMounts:
+  - mountPath: /var/lib/pvc
+    name: {{ $top.Chart.Name }}
+  - mountPath: /etc/nginx/nginx.conf
+    name: nginx-config
+    subPath: nginx.conf
+  - mountPath: /var/cache/nginx
+    name: {{ $top.Chart.Name }}
+  - mountPath: /var/run
+    name: {{ $top.Chart.Name }}
+{{- end }}

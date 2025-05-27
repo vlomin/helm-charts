@@ -1,0 +1,26 @@
+{{- define "common.statefulset.tpl" -}}
+{{- $top := first . }}
+{{- $statefulset := index . 1 }}
+{{- $autoscaling := index . 2 }}
+{{- $serviceAccount := index . 3 }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  {{- include "common.metadata" (list $top) | nindent 2 }}
+spec:
+  serviceName: {{ $top.Chart.Name }}
+  {{- if not $autoscaling.enabled }}
+  replicas: {{ $statefulset.replicaCount | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "common.selectorLabels" $top | nindent 6 }}
+  template:
+    {{- include "common.pod.template" (list $top $statefulset $serviceAccount) | nindent 4 }}
+  volumeClaimTemplates:
+  - {{- include "common.volumeClaimTemplate" (list $top $statefulset) | nindent 4 }}
+{{- end }}
+
+{{- define "common.statefulset" -}}
+{{- include "common.utils.merge" (append . "common.statefulset.tpl") }}
+{{- end }}

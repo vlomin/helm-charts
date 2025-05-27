@@ -1,0 +1,19 @@
+{{- include "common.configMap" (list . "<CHARTNAME>.configMap") }}
+
+{{- define "<CHARTNAME>.configMap" -}}
+{{- $top := first . }}
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    events {}
+    http {
+        server {
+            listen 8080;
+            location / {
+                root   /usr/share/nginx/html;
+                index  index.html index.htm;
+            }
+        }
+    }
+{{- end }}

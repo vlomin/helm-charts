@@ -1,0 +1,9 @@
+{{- define "common.volume.tpl" -}}
+{{- $top := first . }}
+{{- $volume := index . 1 }}
+name: {{ $top.Chart.Name }}
+{{- end }}
+
+{{- define "common.volume" -}}
+{{- include "common.utils.merge" (append . "common.volume.tpl") }}
+{{- end }}
