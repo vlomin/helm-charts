@@ -8,7 +8,7 @@
 - name: {{ $key }}
   value: {{ $value | quote }}
 {{- end }}
-{{- $secretEnvs := append ($microservice.secret_envs | default list) ($common.secret_envs | default list) }}
+{{- $secretEnvs := concat ($microservice.secret_envs | default list) ($common.secret_envs | default list) }}
 {{- range $item := $secretEnvs }}
 - name: {{ $item.env_name }}
   valueFrom:
@@ -17,10 +17,10 @@
       key: {{ $item.secret_key }}
 {{- end }}
 
-{{- $lookupEnvs := append ($microservice.lookup_envs | default list) ($common.lookup_envs | default list) }}
+{{- $lookupEnvs := concat ($microservice.lookup_envs | default list) ($common.lookup_envs | default list) }}
 {{- range $item := $lookupEnvs }}
-  {{- $apiVersion := default "v1" $item.api_version }}
-  {{- $namespace := default $top.Release.Namespace $item.namespace }}
+  {{- $apiVersion := $item.api_version | default "v1" }}
+  {{- $namespace := $item.namespace | default $top.Release.Namespace }}
   {{- $entityKind := $item.entity_kind | default "ConfigMap" }}
   {{- $entity := lookup $apiVersion $entityKind $namespace $item.entity_name }}
   {{- if and $entity $entity.data }}
